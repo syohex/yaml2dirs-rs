@@ -55,8 +55,20 @@ fn main() -> Result<(), String> {
     }
 
     let file = &args[1];
-    let content = fs::read_to_string(file).unwrap();
-    let value: serde_yaml::Value = serde_yaml::from_str(&content).unwrap();
+    let content = match fs::read_to_string(file) {
+        Ok(s) => s,
+        Err(e) => {
+            return Err(format!("cloud not read file {}: {}", file, e.to_string()));
+        }
+    };
+
+    let value: serde_yaml::Value = match serde_yaml::from_str(&content) {
+        Ok(val) => val,
+        Err(e) => {
+            return Err(format!("could not parse as YAML: {}", e.to_string()));
+        }
+    };
+
     let mut path = PathBuf::new();
     make_directories(&value, &mut path)?;
 
